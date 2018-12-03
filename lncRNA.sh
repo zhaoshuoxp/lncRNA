@@ -12,6 +12,7 @@
 
 file=$1
 BED="`dirname $0`/bed"
+gunzip $BED/*.gz
 SCRIPT="`dirname $0`/scripts"
 genome="/home/quanyi/genome/hg19/GRCh37.p13.genome.fa"
 CPC2="/home/quanyi/app/CPC2-beta/bin/CPC2.py"
