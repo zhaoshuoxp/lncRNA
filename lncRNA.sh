@@ -213,7 +213,7 @@ echo "$num_fpkm_1 are known lncRNA"
 cat known_lncRNA_f1.gtf single_exon_f5.gtf multi_exon_f5.gtf > final.gtf
 
 # clean
-#rm *.list *.bed *.bed2 *.fa *.aa *.tlst *.dist *ol* *.nc denovo.gtf exon.gtf known_lncRNA.gtf known_lncRNA_fpkm.1.gtf *_exon.gtf transcript.gtf
+rm *.list *.bed *.bed2 *.fa *.aa *.tlst *.dist *ol* *.nc denovo.gtf exon.gtf known_lncRNA.gtf known_lncRNA_fpkm.1.gtf *_exon.gtf transcript.gtf
  
 
 ################ END ################

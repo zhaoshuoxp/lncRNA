@@ -18,7 +18,7 @@ for line in open(sys.argv[2]):
 		trans.setdefault(a[0], []).append(a[1])
 		
 for i in trans:
-	if int(i[0])>(int(i[1])/2.0):
+	if int(trans[i][0])>(int(trans[i][1])/2.0):
 		print i
 
 
