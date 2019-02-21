@@ -9,15 +9,22 @@
 #CPC2, Biopython
 #bbmap, tophat(gtf_to_fasta)
 
-
 file=$1
 BED="`dirname $0`/bed"
-gunzip $BED/*.gz
 SCRIPT="`dirname $0`/scripts"
 genome="/home/quanyi/genome/hg19/GRCh37.p13.genome.fa"
 CPC2="/home/quanyi/app/CPC2-beta/bin/CPC2.py"
 translation="/home/quanyi/app/bbmap/translate6frames.sh"
 Pfam="/home/quanyi/app/PLAR/Pfam/Pfam-A.hmm"
+
+# Gunzip BED files
+files=$(ls -1 $BED)
+for i in files:
+do
+	if [ "${i##*.}"x = "gz"x ];then
+		gunzip ${BED}/$i
+	fi
+done
 
 # Grep all trnscripts
 awk '$3=="transcript"' $file > transcript.gtf
@@ -25,14 +32,16 @@ num_trans=$(wc -l transcript.gtf|awk '{print $1}')
 echo "Total $num_trans transcripts in the input GTF"
 
 # get known lncRNA transcripts ID
-num_ref=$(wc -l $BED/gencode.v19.long_noncoding_RNAs.list|awk '{print $1}')
+num_ref=$(wc -l $BED/gencode.v29lift37.long_noncoding_RNAs.list|awk '{print $1}')
+#num_ref=$(wc -l $BED/gencode.v19.long_noncoding_RNAs.list|awk '{print $1}')
 echo "Load $num_ref known lncRNA transcripts form GENECODE"
 
 ####
 # Grep known lncRNA transcripts from input GTF
 ####
 
-$SCRIPT/grep_known.py $BED/gencode.v19.long_noncoding_RNAs.list transcript.gtf known_lncRNA.gtf
+#$SCRIPT/grep_known.py $BED/gencode.v19.long_noncoding_RNAs.list transcript.gtf known_lncRNA.gtf
+$SCRIPT/grep_known.py $BED/gencode.v29lift37.long_noncoding_RNAs.list transcript.gtf known_lncRNA.gtf
 num_known=$(wc -l known_lncRNA.gtf|awk '{print $1}')
 
 # filter out known lncRNA transcripts with FPKM<0.1
@@ -54,9 +63,9 @@ grep -v ENS transcript.gtf > denovo.gtf
 # get de novo transcripts ID
 cut -f 4 -d '"' denovo.gtf > denovo.list
 num_novo=$(wc -l denovo.list |awk '{print $1}')
-echo "total $num_novo de novo transcripts"
+echo "total $num_novo unannotated transcripts"
 # get exon of all trnascripts
-awk '$3=="exon"' $file |grep -v ENS > exon.gtf
+awk '{if($3=="exon"){print $0}}' $file |grep -v ENS > exon.gtf
 
 # Sort transcripts by exon number
 $SCRIPT/grep_exon_num.py exon.gtf single_exon.list multi_exon.list
@@ -75,11 +84,15 @@ num_single_f1=$(wc -l single_exon_f1.gtf |awk '{print $1}')
 cut -f 4 -d '"' single_exon_f1.gtf >single_exon_f1.list
 echo "$num_single_f1 out of $num_single single-exon transcripts have FPKM>1 and length>200nt"
 
-# Remove FPKM<1 and length <200 bp multi exon
-awk -F"\"" '$8>1' multi_exon.gtf |awk '{if(($5-$4)>=200){print $0}}'> multi_exon_f1.gtf
+# Remove FPKM<0.1 and length <200 bp multi exon
+awk -F"\"" '$8>0.1' multi_exon.gtf |awk '{if(($5-$4)>=200){print $0}}'> multi_exon_f0.gtf
+cut -f 4 -d '"' multi_exon_f0.gtf > multi_exon_f0.list
+$SCRIPT/grep_known_w_exon.py multi_exon_f0.list exon.gtf multi_exon_f0_exon.gtf
+$SCRIPT/multi_exon_len.py multi_exon_f0_exon.gtf > multi_exon_f1.list
+$SCRIPT/grep_known_w_exon.py multi_exon_f1.list multi_exon_f0.gtf multi_exon_f1.gtf
 num_multi_f1=$(wc -l multi_exon_f1.gtf |awk '{print $1}')
 cut -f 4 -d '"' multi_exon_f1.gtf >multi_exon_f1.list
-echo "$num_multi_f1 out of $num_multi multi-exon transcripts have FPKM>1 and length>200nt"
+echo "$num_multi_f1 out of $num_multi multi-exon transcripts have FPKM>0.1 and length>200nt"
 
 # filter 2: repeat/gap overlaps
 
@@ -95,7 +108,7 @@ echo "$single_ol_repeat out of $num_single_f1 single-exon transcripts have overl
 $SCRIPT/grep_known_w_exon.py multi_exon_f1.list exon.gtf multi_exon_f1_exon.gtf
 cut -f 1,4,5,7,9 multi_exon_f1_exon.gtf |awk -v OFS="\t" '{print $1,$2,$3,$7,$8,$4}'|grep ^chr > multi_exon_f1_exon.bed
 intersectBed -a multi_exon_f1_exon.bed -b $BED/hg19.repeat_gap.bed -u -s -f 0.5 |cut -f 2 -d '"' |sort -u > multi_exon_f1_ol_repeat
-grep -v -f multi_exon_f1_ol_repeat multi_exon_f1.gtf > multi_exon_f2.gtf
+$SCRIPT/remove_list.py multi_exon_f1_ol_repeat multi_exon_f1.gtf multi_exon_f2.gtf
 num_multi_f2=$(wc -l multi_exon_f2.gtf|awk '{print $1}')
 multi_ol_repeat=$(wc -l multi_exon_f1_ol_repeat|awk '{print $1}')
 echo "$multi_ol_repeat out of $num_multi_f1 mutli-exon transcripts have overlaps with repeat sequences"
@@ -112,8 +125,11 @@ echo "$single_ol_cds out of $num_single_f2 single-exon transcripts have overlaps
 cut -f 4 -d '"' multi_exon_f2.gtf > multi_exon_f2.list
 $SCRIPT/grep_known_w_exon.py multi_exon_f2.list exon.gtf multi_exon_f2_exon.gtf
 cut -f 1,4,5,7,9 multi_exon_f2_exon.gtf |awk -v OFS="\t" '{print $1,$2,$3,$7,$8,$4}'|grep ^chr > multi_exon_f2_exon.bed
-intersectBed -a multi_exon_f2_exon.bed -b $BED/CDS.bed -u -s -f 0.5 |cut -f 2 -d '"' |sort -u > multi_exon_f2_ol_cds
-grep -v -f multi_exon_f2_ol_cds multi_exon_f2.gtf > multi_exon_f3.gtf
+#intersectBed -a multi_exon_f2_exon.bed -b $BED/CDS.bed -u -s -f 0.5 |cut -f 2 -d '"' |sort -u > multi_exon_f2_ol_cds
+intersectBed -a multi_exon_f2_exon.bed -b $BED/CDS.bed -u -s -f 0.5|cut -f2 -d '"'|sort |uniq -c|awk -v OFS="\t" '{print $2,$1}' >  multi_exon_f2_ol_cds.list
+cut -f 2 -d '"' multi_exon_f2_exon.bed|sort|uniq -c|awk -v OFS="\t" '{print $2,$1}' >multi_exon_f2_exon.list
+$SCRIPT/count_overlap_exon.py multi_exon_f2_ol_cds.list multi_exon_f2_exon.list > multi_exon_f2_ol_cds
+$SCRIPT/remove_list.py multi_exon_f2_ol_cds multi_exon_f2.gtf multi_exon_f3.gtf
 multi_ol_cds=$(wc -l multi_exon_f2_ol_cds|awk '{print $1}')
 num_multi_f3=$(wc -l multi_exon_f3.gtf|awk '{print $1}')
 echo "$multi_ol_cds out of $num_multi_f2 mutli-exon transcripts have overlaps with CDS"
@@ -160,7 +176,7 @@ awk '{print $3}' multi_exon_f4_hmm.txt | grep [0-9] |awk '{print ">"$1}' > multi
 grep -w -f multi_exon_f4_hmm.list multi_exon_f4_cpc.fa |cut -f 2 -d ' ' > multi_exon_f4.nc.hmm.list
 multi_hmm_nc=$(wc -l multi_exon_f4.nc.hmm.list|awk '{print $1}')
 echo "$multi_hmm_nc are coding by HMMER"
-grep -v -w -f multi_exon_f4.nc.hmm.list multi_exon_f4.nc.list > multi_exon_f5.list
+$SCRIPT/remove_list.py multi_exon_f4.nc.hmm.list multi_exon_f4.nc.list multi_exon_f5.list
 $SCRIPT/grep_known_w_exon.py multi_exon_f5.list multi_exon_f4.gtf multi_exon_f5.gtf
 
 # Remove CPC2 coding poteintal transcripts for single-exon
@@ -171,7 +187,7 @@ echo "Running CPC2 on single-exon transcripts:"
 $CPC2 -i single_exon_f4.fa -o single_exon_f4.out
 awk '{if ($8=="noncoding"){print $1}}' single_exon_f4.out > single_exon_f4.nc
 grep -w -f single_exon_f4.nc single_exon_f4.fa |cut -f 2 -d ' ' > single_exon_f4.nc.list
-single_cpc_nc=$(wc -l multi_exon_f4.nc.list|awk '{print $1}')
+single_cpc_nc=$(wc -l single_exon_f4.nc.list|awk '{print $1}')
 echo "$single_cpc_nc are non-coding by CPC2"
 $SCRIPT/grep_known_w_exon.py single_exon_f4.nc.list single_exon_f4.gtf single_exon_f4_cpc.gtf
 gtf_to_fasta single_exon_f4_cpc.gtf $genome single_exon_f4_cpc.fa
@@ -184,7 +200,7 @@ awk '{print $3}' single_exon_f4_hmm.txt | grep [0-9] |awk '{print ">"$1}' > sing
 grep -w -f single_exon_f4_hmm.list single_exon_f4_cpc.fa |cut -f 2 -d ' ' > single_exon_f4.nc.hmm.list
 single_hmm_nc=$(wc -l single_exon_f4.nc.hmm.list|awk '{print $1}')
 echo "$single_hmm_nc are coding by HMMER"
-grep -v -w -f single_exon_f4.nc.hmm.list single_exon_f4.nc.list > single_exon_f5.list
+$SCRIPT/remove_list.py single_exon_f4.nc.hmm.list single_exon_f4.nc.list single_exon_f5.list
 $SCRIPT/grep_known_w_exon.py single_exon_f5.list single_exon_f4.gtf single_exon_f5.gtf
 
 num_single_f5=$(awk '$3=="transcript"' single_exon_f5.gtf |wc -l|awk '{print $1}')
@@ -197,7 +213,7 @@ echo "$num_fpkm_1 are known lncRNA"
 cat known_lncRNA_f1.gtf single_exon_f5.gtf multi_exon_f5.gtf > final.gtf
 
 # clean
-rm *.list *.bed *.bed2 *.fa *.aa *.out *cpc* *hmm* *.tlst *.dist *ol* *.nc denovo.gtf exon.gtf known_lncRNA.gtf known_lncRNA_fpkm.1.gtf *_exon.gtf transcript.gtf
+#rm *.list *.bed *.bed2 *.fa *.aa *.tlst *.dist *ol* *.nc denovo.gtf exon.gtf known_lncRNA.gtf known_lncRNA_fpkm.1.gtf *_exon.gtf transcript.gtf
  
 
 ################ END ################

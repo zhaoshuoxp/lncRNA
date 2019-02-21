@@ -9,6 +9,6 @@ for line in open(sys.argv[1]):
 
 for line in open(sys.argv[2]):
 	a = line.split()
-	if a[13].rsplit('"')[1] in trans_list:
+	if a[15].rsplit('"')[1] in trans_list:
 		f.writelines(line)
 
