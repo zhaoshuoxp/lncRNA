@@ -34,7 +34,7 @@ echo "Total $num_trans transcripts in the input GTF"
 # get known lncRNA transcripts ID
 num_ref=$(wc -l $BED/gencode.v29lift37.long_noncoding_RNAs.list|awk '{print $1}')
 #num_ref=$(wc -l $BED/gencode.v19.long_noncoding_RNAs.list|awk '{print $1}')
-echo "Load $num_ref known lncRNA transcripts form GENECODE"
+echo "Load $num_ref known lncRNA transcripts from GENECODE"
 
 ####
 # Grep known lncRNA transcripts from input GTF
@@ -125,10 +125,10 @@ echo "$single_ol_cds out of $num_single_f2 single-exon transcripts have overlaps
 cut -f 4 -d '"' multi_exon_f2.gtf > multi_exon_f2.list
 $SCRIPT/grep_known_w_exon.py multi_exon_f2.list exon.gtf multi_exon_f2_exon.gtf
 cut -f 1,4,5,7,9 multi_exon_f2_exon.gtf |awk -v OFS="\t" '{print $1,$2,$3,$7,$8,$4}'|grep ^chr > multi_exon_f2_exon.bed
-#intersectBed -a multi_exon_f2_exon.bed -b $BED/CDS.bed -u -s -f 0.5 |cut -f 2 -d '"' |sort -u > multi_exon_f2_ol_cds
-intersectBed -a multi_exon_f2_exon.bed -b $BED/CDS.bed -u -s -f 0.5|cut -f2 -d '"'|sort |uniq -c|awk -v OFS="\t" '{print $2,$1}' >  multi_exon_f2_ol_cds.list
-cut -f 2 -d '"' multi_exon_f2_exon.bed|sort|uniq -c|awk -v OFS="\t" '{print $2,$1}' >multi_exon_f2_exon.list
-$SCRIPT/count_overlap_exon.py multi_exon_f2_ol_cds.list multi_exon_f2_exon.list > multi_exon_f2_ol_cds
+intersectBed -a multi_exon_f2_exon.bed -b $BED/CDS.bed -u -s -f 0.5 |cut -f 2 -d '"' |sort -u > multi_exon_f2_ol_cds
+#intersectBed -a multi_exon_f2_exon.bed -b $BED/CDS.bed -u -s -f 0.5|cut -f2 -d '"'|sort |uniq -c|awk -v OFS="\t" '{print $2,$1}' >  multi_exon_f2_ol_cds.list
+#cut -f 2 -d '"' multi_exon_f2_exon.bed|sort|uniq -c|awk -v OFS="\t" '{print $2,$1}' >multi_exon_f2_exon.list
+#$SCRIPT/count_overlap_exon.py multi_exon_f2_ol_cds.list multi_exon_f2_exon.list > multi_exon_f2_ol_cds
 $SCRIPT/remove_list.py multi_exon_f2_ol_cds multi_exon_f2.gtf multi_exon_f3.gtf
 multi_ol_cds=$(wc -l multi_exon_f2_ol_cds|awk '{print $1}')
 num_multi_f3=$(wc -l multi_exon_f3.gtf|awk '{print $1}')
@@ -176,7 +176,7 @@ awk '{print $3}' multi_exon_f4_hmm.txt | grep [0-9] |awk '{print ">"$1}' > multi
 grep -w -f multi_exon_f4_hmm.list multi_exon_f4_cpc.fa |cut -f 2 -d ' ' > multi_exon_f4.nc.hmm.list
 multi_hmm_nc=$(wc -l multi_exon_f4.nc.hmm.list|awk '{print $1}')
 echo "$multi_hmm_nc are coding by HMMER"
-$SCRIPT/remove_list.py multi_exon_f4.nc.hmm.list multi_exon_f4.nc.list multi_exon_f5.list
+grep -v -w -f multi_exon_f4.nc.hmm.list multi_exon_f4.nc.list > multi_exon_f5.list
 $SCRIPT/grep_known_w_exon.py multi_exon_f5.list multi_exon_f4.gtf multi_exon_f5.gtf
 
 # Remove CPC2 coding poteintal transcripts for single-exon
@@ -200,7 +200,7 @@ awk '{print $3}' single_exon_f4_hmm.txt | grep [0-9] |awk '{print ">"$1}' > sing
 grep -w -f single_exon_f4_hmm.list single_exon_f4_cpc.fa |cut -f 2 -d ' ' > single_exon_f4.nc.hmm.list
 single_hmm_nc=$(wc -l single_exon_f4.nc.hmm.list|awk '{print $1}')
 echo "$single_hmm_nc are coding by HMMER"
-$SCRIPT/remove_list.py single_exon_f4.nc.hmm.list single_exon_f4.nc.list single_exon_f5.list
+grep -v -w -f single_exon_f4.nc.hmm.list single_exon_f4.nc.list > single_exon_f5.list
 $SCRIPT/grep_known_w_exon.py single_exon_f5.list single_exon_f4.gtf single_exon_f5.gtf
 
 num_single_f5=$(awk '$3=="transcript"' single_exon_f5.gtf |wc -l|awk '{print $1}')
@@ -213,7 +213,10 @@ echo "$num_fpkm_1 are known lncRNA"
 cat known_lncRNA_f1.gtf single_exon_f5.gtf multi_exon_f5.gtf > final.gtf
 
 # clean
-rm *.list *.bed *.bed2 *.fa *.aa *.tlst *.dist *ol* *.nc denovo.gtf exon.gtf known_lncRNA.gtf known_lncRNA_fpkm.1.gtf *_exon.gtf transcript.gtf
+rm *_exon_*hmm* *_exon_*cpc* *_exon_*ol* 
+rm *_exon_*.bed *_exon_*.tlst *_exon_*.dist *_exon_*.nc *_exon_*.list  *_exon_*.bed2 *_exon_*.fa
+rm *_exon.gtf *_exon_*.out *_exon.list
+rm denovo.gtf exon.gtf known_lncRNA.gtf known_lncRNA_fpkm.1.gtf transcript.gtf hmmer.log denovo.list known_lncRNA_fpkm.1.list
  
 
 ################ END ################
