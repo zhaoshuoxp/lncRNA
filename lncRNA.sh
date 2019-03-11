@@ -10,7 +10,7 @@ CPC2="/home/quanyi/app/CPC2-beta/bin/CPC2.py"
 translation="/home/quanyi/app/bbmap/translate6frames.sh"
 Pfam="/home/quanyi/app/PLAR/Pfam/Pfam-A.hmm"
 
-# Gunzip BED files
+# gunzip BED files
 files=$(ls -1 $BED)
 for i in files:
 do
@@ -214,9 +214,8 @@ echo "$num_fpkm_1 are known lncRNA"
 cat known_lncRNA_f1.gtf single_exon_f5.gtf multi_exon_f5.gtf > final.gtf
 
 # clean
-rm single_exon_f?_* multi_exon_f?_* 
-rm *.list *.bed* *.fa* *.nc *.out
 rm known_lncRNA_fpkm* known_lncRNA.gtf hmmer.log single_exon.list single_exon.gtf transcript.gtf multi_exon.gtf exon.gtf multi_exon_f3.dist denovo.gtf
+rm *_exon_f?_* *_exon_f*list *_exon_f*bed* *_exon_f*fa*
 
 ################ END ################
 #          Created by Aone          #
