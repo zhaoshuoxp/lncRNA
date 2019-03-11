@@ -1,8 +1,4 @@
 #!/bin/bash
-#####################################
-# Usage:                            #
-# Manual:                           #
-#####################################
 # Requirement:
 # AWK, Bedtools, bbmap, tophat(gtf_to_fasta)
 # CPC2, Biopython, HMMER(Pfam-A dataset)
@@ -38,8 +34,8 @@ echo "Load $num_ref known lncRNA transcripts from NONCODE"
 # Grep known lncRNA transcripts from input GTF
 ####
 
-#awk -F'"' 'NR==FNR{a[$0]}NR>FNR{if ($6 in a) print $0}'  $BED/gencode.v19.long_noncoding_RNAs.list transcript.gtf known_lncRNA.gtf
-#awk -F'"' 'NR==FNR{a[$0]}NR>FNR{if ($6 in a) print $0}'  $BED/gencode.v29lift37.long_noncoding_RNAs.list transcript.gtf known_lncRNA.gtf
+#awk -F'"' 'NR==FNR{a[$0]}NR>FNR{if ($6 in a) print $0}' $BED/gencode.v19.long_noncoding_RNAs.list transcript.gtf known_lncRNA.gtf
+#awk -F'"' 'NR==FNR{a[$0]}NR>FNR{if ($6 in a) print $0}' $BED/gencode.v29lift37.long_noncoding_RNAs.list transcript.gtf known_lncRNA.gtf
 awk -F'"' 'NR==FNR{a[$0]}NR>FNR{if ($6 in a) print $0}' $BED/NONCODE.list transcript.gtf > known_lncRNA.gtf
 num_known=$(wc -l known_lncRNA.gtf|awk '{print $1}')
 
@@ -117,7 +113,7 @@ echo "$multi_ol_repeat out of $num_multi_f1 mutli-exon transcripts have overlaps
 # filter 3: CDS overlaps
 
 # Remove single-exon transcripts overlapping with CDS
-intersectBed -a single_exon_f2_exon.bed -b $BED/CDS.bed -v -s -f 0.5 > single_exon_f3_exon.bed
+intersectBed -a single_exon_f2_exon.bed -b $BED/CDS.bed -v -s > single_exon_f3_exon.bed
 num_single_f3=$(wc -l single_exon_f3_exon.bed |awk '{print $1}')
 single_ol_cds=$((num_single_f2-num_single_f3))
 echo "$single_ol_cds out of $num_single_f2 single-exon transcripts have overlaps with CDS"
@@ -126,7 +122,7 @@ echo "$single_ol_cds out of $num_single_f2 single-exon transcripts have overlaps
 cut -f 4 -d '"' multi_exon_f2.gtf > multi_exon_f2.list
 awk -F'"' 'NR==FNR{a[$0]}NR>FNR{if ($4 in a) print $0}' multi_exon_f2.list exon.gtf > multi_exon_f2_exon.gtf
 cut -f 1,4,5,7,9 multi_exon_f2_exon.gtf |awk -v OFS="\t" '{print $1,$2,$3,$7,$8,$4}'|grep ^chr > multi_exon_f2_exon.bed
-intersectBed -a multi_exon_f2_exon.bed -b $BED/CDS.bed -u -s -f 0.5 |cut -f 2 -d '"' |sort -u > multi_exon_f2_ol_cds
+intersectBed -a multi_exon_f2_exon.bed -b $BED/CDS.bed -u -s |cut -f 2 -d '"' |sort -u > multi_exon_f2_ol_cds
 #intersectBed -a multi_exon_f2_exon.bed -b $BED/CDS.bed -u -s -f 0.5|cut -f2 -d '"'|sort |uniq -c|awk -v OFS="\t" '{print $2,$1}' >  multi_exon_f2_ol_cds.list
 #cut -f 2 -d '"' multi_exon_f2_exon.bed|sort|uniq -c|awk -v OFS="\t" '{print $2,$1}' >multi_exon_f2_exon.list
 awk -F'"' 'NR==FNR{a[$0]}NR>FNR{if ($4 in a){}else{print $0}}' multi_exon_f2_ol_cds multi_exon_f2.gtf > multi_exon_f3.gtf
@@ -138,7 +134,7 @@ echo "$multi_ol_cds out of $num_multi_f2 mutli-exon transcripts have overlaps wi
 
 # Remove single-exon transcripts near (<2000bp) protein-coding genes
 bedtools sort -i single_exon_f3_exon.bed > single_exon_f3_exon.bed2
-closestBed -s -d -a $BED/hg19_pc_txSE.bed -b single_exon_f3_exon.bed2 > single_exon_f3_exon.dist
+closestBed -s -d -io -a $BED/hg19_pc_txSE.bed -b single_exon_f3_exon.bed2 > single_exon_f3_exon.dist
 awk '$13>2000' single_exon_f3_exon.dist |cut -f 7-12 |sort -u > single_exon_f4_exon.bed
 num_single_f4=$(wc -l single_exon_f4_exon.bed|awk '{print $1}')
 single_ol_ud=$((num_single_f3-num_single_f4))
@@ -147,7 +143,7 @@ echo "$single_ol_ud out of $num_single_f3 single-exon transcripts are too close 
 # Remove multi-exon transcripts near (<500bp) protein-coding genes
 awk -v OFS="\t" '{print $1,$4,$5,$11,$12,$7}' multi_exon_f3.gtf |grep ^chr > multi_exon_f3.bed
 bedtools sort -i multi_exon_f3.bed > multi_exon_f3.bed2
-closestBed -s -d -a $BED/hg19_pc_txSE.bed -b multi_exon_f3.bed2 > multi_exon_f3.dist
+closestBed -s -d -io -a $BED/hg19_pc_txSE.bed -b multi_exon_f3.bed2 > multi_exon_f3.dist
 awk '$13>500' multi_exon_f3.dist |cut -f 7-12 |sort -u > multi_exon_f4.bed
 num_multi_f4=$(wc -l multi_exon_f4.bed|awk '{print $1}')
 multi_ol_ud=$((num_multi_f3-num_multi_f4))
@@ -207,6 +203,7 @@ echo "$single_hmm_nc are coding by HMMER"
 awk 'NR==FNR{a[$0]}NR>FNR{if ($1 in a){}else{print $0}}' single_exon_f4.nc.hmm.list single_exon_f4.nc.list > single_exon_f5.list
 awk -F'"' 'NR==FNR{a[$0]}NR>FNR{if ($4 in a) print $0}' single_exon_f5.list single_exon_f4.gtf > single_exon_f5.gtf
 
+# summary
 num_single_f5=$(awk '$3=="transcript"' single_exon_f5.gtf |wc -l|awk '{print $1}')
 num_multi_f5=$(awk '$3=="transcript"' multi_exon_f5.gtf |wc -l|awk '{print $1}')
 total=$((num_single_f5+num_fpkm_1+num_multi_f5))
@@ -217,9 +214,9 @@ echo "$num_fpkm_1 are known lncRNA"
 cat known_lncRNA_f1.gtf single_exon_f5.gtf multi_exon_f5.gtf > final.gtf
 
 # clean
-#rm single_exon_f?_* multi_exon_f?_* 
-#rm *.list *.bed* *.fa* *.nc *.out
-#rm known_lncRNA_fpkm* known_lncRNA.gtf hmmer.log single_exon.list single_exon.gtf transcript.gtf multi_exon.gtf exon.gtf
+rm single_exon_f?_* multi_exon_f?_* 
+rm *.list *.bed* *.fa* *.nc *.out
+rm known_lncRNA_fpkm* known_lncRNA.gtf hmmer.log single_exon.list single_exon.gtf transcript.gtf multi_exon.gtf exon.gtf multi_exon_f3.dist denovo.gtf
 
 ################ END ################
 #          Created by Aone          #
