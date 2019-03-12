@@ -214,8 +214,8 @@ echo "$num_fpkm_1 are known lncRNA"
 cat known_lncRNA_f1.gtf single_exon_f5.gtf multi_exon_f5.gtf > final.gtf
 
 # clean
-rm known_lncRNA_fpkm* known_lncRNA.gtf hmmer.log single_exon.list single_exon.gtf transcript.gtf multi_exon.gtf exon.gtf multi_exon_f3.dist denovo.gtf
-rm *_exon_f?_* *_exon_f*list *_exon_f*bed* *_exon_f*fa*
+rm known_lncRNA_fpkm* known_lncRNA.gtf hmmer.log single_exon.list single_exon.gtf transcript.gtf multi_exon.gtf exon.gtf denovo.gtf multi_exon.list 
+rm multi_exon_f0* multi_exon_f1* multi_exon_f2* multi_exon_f3* multi_exon_f4* single_exon_f1* single_exon_f2* single_exon_f3* single_exon_f4*
 
 ################ END ################
 #          Created by Aone          #
