@@ -25,22 +25,22 @@ num_trans=$(wc -l transcript.gtf|awk '{print $1}')
 echo "Total $num_trans transcripts in the input GTF"
 
 # get known lncRNA transcripts ID
-num_ref=$(wc -l $BED/NONCODE.list|awk '{print $1}')
+#num_ref=$(wc -l $BED/NONCODE.list|awk '{print $1}')
 #num_ref=$(wc -l $BED/gencode.v29lift37.long_noncoding_RNAs.list|awk '{print $1}')
-#num_ref=$(wc -l $BED/gencode.v19.long_noncoding_RNAs.list|awk '{print $1}')
-echo "Load $num_ref known lncRNA transcripts from NONCODE"
+num_ref=$(wc -l $BED/gencode.v19.long_noncoding_RNAs.list|awk '{print $1}')
+echo "Load $num_ref known lncRNA transcripts from GENCODE"
 
 ####
 # Grep known lncRNA transcripts from input GTF
 ####
 
-#awk -F'"' 'NR==FNR{a[$0]}NR>FNR{if ($6 in a) print $0}' $BED/gencode.v19.long_noncoding_RNAs.list transcript.gtf known_lncRNA.gtf
+awk -F'"' 'NR==FNR{a[$0]}NR>FNR{if ($6 in a) print $0}' $BED/gencode.v19.long_noncoding_RNAs.list transcript.gtf known_lncRNA.gtf
 #awk -F'"' 'NR==FNR{a[$0]}NR>FNR{if ($6 in a) print $0}' $BED/gencode.v29lift37.long_noncoding_RNAs.list transcript.gtf known_lncRNA.gtf
-awk -F'"' 'NR==FNR{a[$0]}NR>FNR{if ($6 in a) print $0}' $BED/NONCODE.list transcript.gtf > known_lncRNA.gtf
+#awk -F'"' 'NR==FNR{a[$0]}NR>FNR{if ($6 in a) print $0}' $BED/NONCODE.list transcript.gtf > known_lncRNA.gtf
 num_known=$(wc -l known_lncRNA.gtf|awk '{print $1}')
 
 # filter out known lncRNA transcripts with FPKM<0.1
-awk -F"\"" '$12>0.1' known_lncRNA.gtf > known_lncRNA_fpkm.1.gtf
+awk -F"\"" '$14>0.1' known_lncRNA.gtf > known_lncRNA_fpkm.1.gtf
 num_fpkm_1=$(wc -l known_lncRNA_fpkm.1.gtf|awk '{print $1}')
 low=$((num_known-num_fpkm_1))
 echo "Found $num_known known lncRNA transcripts in the input GTF"
@@ -54,13 +54,13 @@ awk -F'"' 'NR==FNR{a[$0]}NR>FNR{if ($4 in a) print $0}' known_lncRNA_fpkm.1.list
 ###
 
 # Remove all reference transcripts
-grep -v NONHSAT transcript.gtf > denovo.gtf
+grep -v ENST transcript.gtf > denovo.gtf
 # get de novo transcripts ID
 cut -f 4 -d '"' denovo.gtf > denovo.list
 num_novo=$(wc -l denovo.list |awk '{print $1}')
 echo "total $num_novo unannotated transcripts"
 # get exon of all trnascripts
-awk '{if($3=="exon"){print $0}}' $file |grep -v NONHSAT > exon.gtf
+awk '{if($3=="exon"){print $0}}' $file |grep -v ENST > exon.gtf
 
 # Sort transcripts by exon number
 cut -f4 -d '"' exon.gtf |sort |uniq -c > exon.list
@@ -214,7 +214,7 @@ echo "$num_fpkm_1 are known lncRNA"
 cat known_lncRNA_f1.gtf single_exon_f5.gtf multi_exon_f5.gtf > final.gtf
 
 # clean
-rm known_lncRNA_fpkm* known_lncRNA.gtf hmmer.log single_exon.list single_exon.gtf transcript.gtf multi_exon.gtf exon.gtf denovo.gtf multi_exon.list 
+rm known_lncRNA_fpkm* known_lncRNA.gtf hmmer.log single_exon.list single_exon.gtf transcript.gtf multi_exon.gtf exon.gtf denovo.gtf multi_exon.list denovo.list exon.list
 rm multi_exon_f0* multi_exon_f1* multi_exon_f2* multi_exon_f3* multi_exon_f4* single_exon_f1* single_exon_f2* single_exon_f3* single_exon_f4*
 
 ################ END ################
