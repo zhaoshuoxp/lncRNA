@@ -45,10 +45,8 @@ Then the script combines known and *de novo* lncRNAs together as final.gtf.
         wget https://github.com/zhaoshuoxp/Pipelines-Wrappers/blob/master/trans_assemble.sh
         chmod 755 trans_assemble.sh
         ./trans_assemble.sh test_R1.fastq.gz test_R2.fastq.gz rf
-
-
+        
 The output test.gtf can be used for lncRNA discovery.
-
 **2.** lncRNA filtering:
 
         git clone https://github.com/zhaoshuoxp/lncRNA
@@ -69,7 +67,7 @@ Further transcript deduplication could be performed if you merge multiple GTFs b
         wget https://github.com/zhaoshuoxp/Converters/blob/master/GTF_rmdup.sh
         chmod 755 GTF_rmdup.sh
         ./GTF_rmdup.sh final.gtf final_uniq.gtf
-        
+                
 > NOTE:[UCSC Genome Browser utility](http://hgdownload.soe.ucsc.edu/admin/exe/) gtfToGenePred and genePredToBed are required.
 
 
