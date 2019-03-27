@@ -1,4 +1,4 @@
-﻿# *de novo* lncRNA discovery pipeline
+# *de novo* lncRNA discovery pipeline
 -----
 This is a shell/awk re-writted [PLAR](http://www.weizmann.ac.il/Biological_Regulation/IgorUlitsky/PLAR) script for lncRNAs discovery. 
 
@@ -46,7 +46,7 @@ Then the script combines known and *de novo* lncRNAs together as final.gtf.
         chmod 755 trans_assemble.sh
         ./trans_assemble.sh test_R1.fastq.gz test_R2.fastq.gz rf
     
-    The output test.gtf can be used for lncRNA discovery.
+The output test.gtf can be used for lncRNA discovery.
 **2.** lncRNA filtering:
 
         git clone https://github.com/zhaoshuoxp/lncRNA
