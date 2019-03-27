@@ -45,8 +45,10 @@ Then the script combines known and *de novo* lncRNAs together as final.gtf.
         wget https://github.com/zhaoshuoxp/Pipelines-Wrappers/blob/master/trans_assemble.sh
         chmod 755 trans_assemble.sh
         ./trans_assemble.sh test_R1.fastq.gz test_R2.fastq.gz rf
-    
+
+
 The output test.gtf can be used for lncRNA discovery.
+
 **2.** lncRNA filtering:
 
         git clone https://github.com/zhaoshuoxp/lncRNA
