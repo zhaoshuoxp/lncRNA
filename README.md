@@ -62,7 +62,7 @@ All results will be store in current (./) directory. Log will be printed when ru
 * multi_exon_f5.gtf: all filter passed multi-exon *de novo* lncRNA transcripts.
 * single_exon_f5.gtf: all filter passed single-exon *de novo* lncRNA transcripts.
 
-Further transcript deduplication could be performed if you merge multiple GTFs before or after this pipeline:
+Further transcript deduplication could be performed if you merge multiple GTFs before or after running this pipeline:
 
         wget https://github.com/zhaoshuoxp/Converters/blob/master/GTF_rmdup.sh
         chmod 755 GTF_rmdup.sh
