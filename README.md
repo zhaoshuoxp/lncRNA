@@ -13,7 +13,7 @@ This is a shell/awk re-writted [PLAR](http://www.weizmann.ac.il/Biological_Regul
 
 This script uses original output GTF file of [stringtie](https://ccb.jhu.edu/software/stringtie/). There should be a unique transcript ID in field 2, FPKM in field 4 for *de novo* or in field 7 for reference transcript of column 9 when you run stringtie with [GENCODE ref GTF](https://www.gencodegenes.org/human/release_19.html) guide.
 
-> The position of ID or FPKM could change if you use other references, ex: NONCODE. Change line43, line57 if necessary.
+> The position of ID or FPKM could change if you use other references, e.g. NONCODE. Change line43, line57 if necessary.
 
 ### How it works
 The filtering principle and threshold are based on [PLAR](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4576741/) with several steps simplification and improvement.
@@ -41,8 +41,8 @@ The filtering principle and threshold are based on [PLAR](https://www.ncbi.nlm.n
 
 Then the script combines known and *de novo* lncRNAs together as final.gtf.
 
+### Example
 
-### Example run
 **1.** Reads mapping and transcripts assembly. [trans_assemble.sh](https://github.com/zhaoshuoxp/Pipelines-Wrappers/blob/master/trans_assemble.sh) can be used as an example:
 
 ```shell
