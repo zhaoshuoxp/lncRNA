@@ -5,7 +5,10 @@ This is a shell/awk re-writted [PLAR](http://www.weizmann.ac.il/Biological_Regul
 > Requirements:
 > awk, Python, Biopython, bedtools, [bbmap](https://sourceforge.net/projects/bbmap/), gtf_to_fasta(tophat module), [CPC2.0beta](http://cpc2.cbi.pku.edu.cn/download.php), [HMMER](http://hmmer.org)([with Pfam-A dataset](https://pfam.xfam.org))
 
------
+
+
+----
+
 ### Input
 
 This script uses original output GTF file of [stringtie](https://ccb.jhu.edu/software/stringtie/). There should be a unique transcript ID in field 2, FPKM in field 4 for *de novo* or in field 7 for reference transcript of column 9 when you run stringtie with [GENCODE ref GTF](https://www.gencodegenes.org/human/release_19.html) guide.
@@ -42,17 +45,21 @@ Then the script combines known and *de novo* lncRNAs together as final.gtf.
 ### Example run
 **1.** Reads mapping and transcripts assembly. [trans_assemble.sh](https://github.com/zhaoshuoxp/Pipelines-Wrappers/blob/master/trans_assemble.sh) can be used as an example:
 
-        wget https://github.com/zhaoshuoxp/Pipelines-Wrappers/blob/master/trans_assemble.sh
-        chmod 755 trans_assemble.sh
-        ./trans_assemble.sh test_R1.fastq.gz test_R2.fastq.gz rf
-        
+```shell
+    wget https://github.com/zhaoshuoxp/Pipelines-Wrappers/blob/master/trans_assemble.sh
+    chmod 755 trans_assemble.sh
+    ./trans_assemble.sh test_R1.fastq.gz test_R2.fastq.gz rf
+```
+
 The output test.gtf can be used for lncRNA discovery.
 **2.** lncRNA filtering:
 
-        git clone https://github.com/zhaoshuoxp/lncRNA
-        cd lncRNA
-        chmod 755 lncRNA.sh
-        ./lncRNA.sh test.gtf
+```shell
+    git clone https://github.com/zhaoshuoxp/lncRNA
+    cd lncRNA
+    chmod 755 lncRNA.sh
+    ./lncRNA.sh test.gtf
+```
 
 ###  Output
 All results will be store in current (./) directory. Log will be printed when running.
@@ -64,13 +71,17 @@ All results will be store in current (./) directory. Log will be printed when ru
 
 Further transcript deduplication could be performed if you merge multiple GTFs before or after running this pipeline:
 
-        wget https://github.com/zhaoshuoxp/Converters/blob/master/GTF_rmdup.sh
-        chmod 755 GTF_rmdup.sh
-        ./GTF_rmdup.sh final.gtf final_uniq.gtf
-                
+```shell
+    wget https://github.com/zhaoshuoxp/Converters/blob/master/GTF_rmdup.sh
+    chmod 755 GTF_rmdup.sh
+    ./GTF_rmdup.sh final.gtf final_uniq.gtf
+```
+
 > NOTE:[UCSC Genome Browser utility](http://hgdownload.soe.ucsc.edu/admin/exe/) gtfToGenePred and genePredToBed are required.
 
 
------
+
+----
+
 Author [@zhaoshuoxp](https://github.com/zhaoshuoxp)  
 Mar 27 2019  
