@@ -43,7 +43,7 @@ Then the script combines known and *de novo* lncRNAs together as final.gtf.
 
 ### Example
 
-**1.** Reads mapping and transcripts assembly. [trans_assemble.sh](https://github.com/zhaoshuoxp/Pipelines-Wrappers/blob/master/trans_assemble.sh) can be used as an example:
+**1.** Reads mapping and transcripts assembly. [trans_assemble.sh](https://github.com/zhaoshuoxp/Pipelines-Wrappers#trans_assemblesh) can be used as an example:
 
 ```shell
     wget https://github.com/zhaoshuoxp/Pipelines-Wrappers/blob/master/trans_assemble.sh
