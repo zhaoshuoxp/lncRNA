@@ -18,6 +18,7 @@ This script uses original output GTF file of [stringtie](https://ccb.jhu.edu/sof
 ### How it works
 The filtering principle and threshold are based on [PLAR](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4576741/) with several steps simplification and improvement.
 #### **For known lncRNAs:**
+
 1. Seperate reference lncRNA from input by matching the unique ID of  known lncRNAs in the reference to the input.
 > [GRCh37.p13 long non-coding RNA gene annotation](ftp://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_19/gencode.v19.long_noncoding_RNAs.gtf.gz) was used by default, can be changed on line37. !!!Use the SAME version of ref GTF annotation ([GRCh37.p13 comprehensive](ftp://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_19/gencode.v19.chr_patch_hapl_scaff.annotation.gtf.gz)) for transcript assembly.!!!
 
@@ -27,7 +28,7 @@ The filtering principle and threshold are based on [PLAR](https://www.ncbi.nlm.n
 #### **For *de novo* lncRNAs:**
 1. Get all *de novo* transcripts by removing all transcripts which have been assigned with a reference ID.
 2. Sort the rest of transcripts into single- or multi- exon group.
-3. Filter 1 - FPKM and length: transcipt length has to be >200bp and FPKM has to be >1 for single-exon or >0.1 for multi-exon to be kept.
+3. Filter 1 - FPKM and length: transcript length has to be >200bp and FPKM has to be >1 for single-exon or >0.1 for multi-exon to be kept.
 > Thresholds are on line80 and 86.
 
 4. Filter 2 - repeat/gap regions: Any transcrpt which has at least 1 exon overlaps with genomic repeat sequences or gap regions for >=50% fraction will be removed.
