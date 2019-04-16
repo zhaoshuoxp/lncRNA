@@ -47,19 +47,19 @@ Then the script combines known and *de novo* lncRNAs together as final.gtf.
 **1.** Reads mapping and transcripts assembly. [trans_assemble.sh](https://github.com/zhaoshuoxp/Pipelines-Wrappers#trans_assemblesh) can be used as an example:
 
 ```shell
-    wget https://github.com/zhaoshuoxp/Pipelines-Wrappers/blob/master/trans_assemble.sh
-    chmod 755 trans_assemble.sh
-    ./trans_assemble.sh test_R1.fastq.gz test_R2.fastq.gz rf
+wget https://raw.githubusercontent.com/zhaoshuoxp/Pipelines-Wrappers/master/trans_assemble.sh
+chmod 755 trans_assemble.sh
+./trans_assemble.sh test_R1.fastq.gz test_R2.fastq.gz rf
 ```
 
 The output test.gtf can be used for lncRNA discovery.
 **2.** lncRNA filtering:
 
 ```shell
-    git clone https://github.com/zhaoshuoxp/lncRNA
-    cd lncRNA
-    chmod 755 lncRNA.sh
-    ./lncRNA.sh test.gtf
+git clone https://github.com/zhaoshuoxp/lncRNA
+cd lncRNA
+chmod 755 lncRNA.sh
+./lncRNA.sh test.gtf
 ```
 
 ###  Output
@@ -73,9 +73,9 @@ All results will be store in current (./) directory. Log will be printed when ru
 Further transcript deduplication could be performed if you merge multiple GTFs before or after running this pipeline:
 
 ```shell
-    wget https://github.com/zhaoshuoxp/Converters/blob/master/GTF_rmdup.sh
-    chmod 755 GTF_rmdup.sh
-    ./GTF_rmdup.sh final.gtf final_uniq.gtf
+wget https://raw.githubusercontent.com/zhaoshuoxp/Pipelines-Wrappers/master/GTF_rmdup.sh
+chmod 755 GTF_rmdup.sh
+./GTF_rmdup.sh final.gtf final_uniq.gtf
 ```
 
 > NOTE:[UCSC Genome Browser utility](http://hgdownload.soe.ucsc.edu/admin/exe/) gtfToGenePred and genePredToBed are required.
