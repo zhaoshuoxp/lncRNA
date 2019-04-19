@@ -5,7 +5,7 @@ This is a shell/awk re-writted [PLAR](http://www.weizmann.ac.il/Biological_Regul
 > Requirements:
 > awk, Python, Biopython, bedtools, [bbmap](https://sourceforge.net/projects/bbmap/), gtf_to_fasta(tophat module), [CPC2.0beta](http://cpc2.cbi.pku.edu.cn/download.php), [HMMER](http://hmmer.org)([with Pfam-A dataset](https://pfam.xfam.org))
 
-
+[![996.icu](https://img.shields.io/badge/link-996.icu-red.svg)](https://996.icu)
 
 ----
 
@@ -16,6 +16,7 @@ This script uses original output GTF file of [stringtie](https://ccb.jhu.edu/sof
 > The position of ID or FPKM could change if you use other references, i.e. NONCODE. Change line43, line57 if necessary.
 
 ### How it works
+
 The filtering principle and threshold are based on [PLAR](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4576741/) with several steps simplification and improvement.
 #### **For known lncRNAs:**
 
