@@ -11,16 +11,16 @@ This is a shell/awk re-writted [PLAR](http://www.weizmann.ac.il/Biological_Regul
 
 ### Input
 
-This script uses original output GTF file of [stringtie](https://ccb.jhu.edu/software/stringtie/). There should be a unique transcript ID on field 2, FPKM on field 4 for *de novo* or on field 7 for reference transcript of column 9 when you run stringtie with [GENCODE ref GTF](https://www.gencodegenes.org/human/release_19.html) guide.
+This script uses original output GTF file of [stringtie](https://ccb.jhu.edu/software/stringtie/). There should be a unique transcript ID on field 2, FPKM on field 4 for *de novo* or on field 7 for reference transcript of column 9 when you run stringtie guided with [GENCODE ref GTF](https://www.gencodegenes.org/human/release_19.html).
 
-> The position of ID or FPKM could change if you use other references, i.e. NONCODE. Change line43, line57 if necessary.
+> The position of ID or FPKM could change if you use other references, i.e. NONCODE. Change line43 and 57 if necessary.
 
 ### How it works
 
 The filtering principle and threshold are based on [PLAR](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4576741/) with several steps simplification and improvement.
 #### **For known lncRNAs:**
 
-1. Seperate reference lncRNA from input by matching the unique ID of  known lncRNAs in the reference to the input.
+1. Separate reference lncRNA from input by matching the unique ID of  known lncRNAs in the reference to the input GTF.
 > [GRCh37.p13 long non-coding RNA gene annotation](ftp://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_19/gencode.v19.long_noncoding_RNAs.gtf.gz) was used by default, can be changed on line37.
 >
 > !NOTE: Use the SAME version of ref GTF annotation ([GRCh37.p13 comprehensive](ftp://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_19/gencode.v19.chr_patch_hapl_scaff.annotation.gtf.gz)) for transcript assembly.
@@ -29,6 +29,7 @@ The filtering principle and threshold are based on [PLAR](https://www.ncbi.nlm.n
 > The threshold can be changed on line43.
 
 #### **For *de novo* lncRNAs:**
+
 1. Get all *de novo* transcripts by removing all transcripts which have been assigned with reference ID.
 2. Sort the rest of transcripts into single- or multi- exon groups.
 3. Filter 1 - FPKM and length: transcript length has to be >200bp and FPKM has to be >1 for single-exon or >0.1 for multi-exon to be kept.
@@ -47,7 +48,7 @@ Then the script combines known and *de novo* lncRNAs together to final.gtf.
 
 ### Example
 
-**1.** Reads mapping and transcripts assembly. [trans_assemble.sh](https://github.com/zhaoshuoxp/Pipelines-Wrappers#trans_assemblesh) can be used as an example:
+**1.** Reads mapping and transcripts assembly. [trans_assemble.sh](https://github.com/zhaoshuoxp/Pipelines-Wrappers#trans_assemblesh) can be used. i.e.
 
 ```shell
 wget https://raw.githubusercontent.com/zhaoshuoxp/Pipelines-Wrappers/master/trans_assemble.sh
@@ -67,14 +68,14 @@ chmod 755 lncRNA.sh
 
 ###  Output
 
-All results will be store in current (./) directory. Log will be printed when running.
+All results will be store in current (./) directory. Log will be printed during running.
 
 * final.gtf: combined final transcripts in GTF format.
 * known_lncRNA_f1.gtf: FPKM>1 filtered reference lncRNA transcripts.
 * multi_exon_f5.gtf: all filter passed multi-exon *de novo* lncRNA transcripts.
 * single_exon_f5.gtf: all filter passed single-exon *de novo* lncRNA transcripts.
 
-Further transcript deduplication could be performed if you merge multiple GTFs before or after running this pipeline:
+Further transcript deduplication could be performed if you merged multiple GTFs before or after running this pipeline:
 
 ```shell
 wget https://raw.githubusercontent.com/zhaoshuoxp/Pipelines-Wrappers/master/GTF_rmdup.sh
