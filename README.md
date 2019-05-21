@@ -57,6 +57,7 @@ chmod 755 trans_assemble.sh
 ```
 
 The output test.gtf can be used for lncRNA discovery.
+
 **2.** lncRNA filtering:
 
 ```shell
