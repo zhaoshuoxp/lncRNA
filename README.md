@@ -11,7 +11,7 @@ This is a shell/awk re-writted [PLAR](http://www.weizmann.ac.il/Biological_Regul
 
 ### Input
 
-This script uses original output GTF file of [stringtie](https://ccb.jhu.edu/software/stringtie/). There should be a unique transcript ID on field 2, FPKM on field 4 for *de novo* or on field 7 for reference transcript of column 9 when you run stringtie guided with [GENCODE ref GTF](https://www.gencodegenes.org/human/release_19.html).
+This script uses original output GTF file of [stringtie](https://ccb.jhu.edu/software/stringtie/). There should be unique transcript IDs on field 2, FPKMs on field 4 for *de novo* or on field 7 for reference transcript of column if stringtie was ran with [GENCODE ref GTF](https://www.gencodegenes.org/human/release_19.html) guide.
 
 > The position of ID or FPKM could change if you use other references, i.e. NONCODE. Change line43 and 57 if necessary.
 
@@ -20,7 +20,7 @@ This script uses original output GTF file of [stringtie](https://ccb.jhu.edu/sof
 The filtering principle and threshold are based on [PLAR](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4576741/) with several steps simplification and improvement.
 #### **For known lncRNAs:**
 
-1. Separate reference lncRNA from input by matching the unique ID of  known lncRNAs in the reference to the input GTF.
+1. Separate reference lncRNA from input by matching the unique ID of  known lncRNAs of the reference.
 > [GRCh37.p13 long non-coding RNA gene annotation](ftp://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_19/gencode.v19.long_noncoding_RNAs.gtf.gz) was used by default, can be changed on line37.
 >
 > !NOTE: Use the SAME version of ref GTF annotation ([GRCh37.p13 comprehensive](ftp://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_19/gencode.v19.chr_patch_hapl_scaff.annotation.gtf.gz)) for transcript assembly.
@@ -30,7 +30,7 @@ The filtering principle and threshold are based on [PLAR](https://www.ncbi.nlm.n
 
 #### **For *de novo* lncRNAs:**
 
-1. Get all *de novo* transcripts by removing all transcripts which have been assigned with reference ID.
+1. Get all *de novo* transcripts by removing the transcripts which have been assigned with reference ID.
 2. Sort the rest of transcripts into single- or multi- exon groups.
 3. Filter 1 - FPKM and length: transcript length has to be >200bp and FPKM has to be >1 for single-exon or >0.1 for multi-exon to be kept.
 > Thresholds are on line80 and 86.
@@ -42,9 +42,9 @@ The filtering principle and threshold are based on [PLAR](https://www.ncbi.nlm.n
 6. Filter 4 - distance to genes: For the single-exon transcripts which have distance < 2000bp to protein coding gene and <500 for multi-exon transcripts will be removed.
 > line138 and 147.
 
-7. Filter 5 - CPC2 and HMMER: Non-coding potential and protein coding potential of the transcripts will be calculated by CPC2.0beta and hmmscan with Pfam-A dataset. Transcripts passed both will be kept and could be consider as potential *de novo* lncRNAs. 
+7. Filter 5 - CPC2 and HMMER: Non-coding potential and protein coding potential of the transcripts will be calculated by *CPC2.0beta* and *hmmscan* with Pfam-A dataset. Transcripts passed both will be kept and could be consider as potential *de novo* lncRNAs. 
 
-Then the script combines known and *de novo* lncRNAs together to final.gtf.
+Then the script combines known and *de novo* lncRNAs together to a final.gtf.
 
 ### Example
 
