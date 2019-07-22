@@ -1,6 +1,6 @@
 # *de novo* lncRNA discovery pipeline
 -----
-This is a shell/awk re-writted [PLAR](http://www.weizmann.ac.il/Biological_Regulation/IgorUlitsky/PLAR) script for lncRNAs discovery. 
+This is a shell/awk re-written [PLAR](http://www.weizmann.ac.il/Biological_Regulation/IgorUlitsky/PLAR) script for lncRNA discovery. 
 
 > Requirements:
 > awk, Python, Biopython, bedtools, [bbmap](https://sourceforge.net/projects/bbmap/), gtf_to_fasta(tophat module), [CPC2.0beta](http://cpc2.cbi.pku.edu.cn/download.php), [HMMER](http://hmmer.org)([with Pfam-A dataset](https://pfam.xfam.org))
