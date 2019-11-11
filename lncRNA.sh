@@ -3,7 +3,7 @@
 # AWK, Bedtools, bbmap, tophat(gtf_to_fasta)
 # CPC2, Biopython, HMMER(Pfam-A dataset)
 
-BED="`dirname $0`/bed"
+BED=$(cd `dirname $0`; pwd)"/bed"
 genome="/home/quanyi/genome/hg19/GRCh37.p13.genome.fa"
 CPC2="/home/quanyi/app/CPC2-beta/bin/CPC2.py"
 translation="/home/quanyi/app/bbmap/translate6frames.sh"
