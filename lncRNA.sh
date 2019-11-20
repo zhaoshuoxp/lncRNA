@@ -206,8 +206,9 @@ denovo_f3(){ # $1=overlapping fraction
 denovo_f4(){ # $1=single_dist $2=multi_dist
     # Remove single-exon transcripts near (<2000bp) protein-coding genes
     bedtools sort -i single_exon_f3_exon.bed > single_exon_f3_exon.bed2
-    closestBed -s -d -io -a $BED/hg19_pc_txSE.bed -b single_exon_f3_exon.bed2 > single_exon_f3_exon.dist
-    awk '$13>"'"$1"'"' single_exon_f3_exon.dist |cut -f 7-12 |sort -u > single_exon_f4_exon.bed
+    closestBed -s -d -a $BED/hg19_pc_txSE.bed -b single_exon_f3_exon.bed2 > single_exon_f3_exon.dist
+    awk '$13<"'"$1"'"' single_exon_f3_exon.dist |awk -F"\"" '{print $2}'| sort -u > singe_dist_re.list
+    awk -F"\"" 'NR==FNR{a[$0]}NR>FNR{if ($2 in a){}else{print $0}}' singe_dist_re.list single_exon_f3_exon.bed > single_exon_f4_exon.bed
     num_single_f4=$(wc -l single_exon_f4_exon.bed|awk '{print $1}')
     single_ol_ud=$((num_single_f3-num_single_f4))
     echo "$single_ol_ud out of $num_single_f3 single-exon transcripts are too close ($1bp) to protein-coding genes"
@@ -215,13 +216,14 @@ denovo_f4(){ # $1=single_dist $2=multi_dist
     # Remove multi-exon transcripts near (<500bp) protein-coding genes
     awk -v OFS="\t" '{print $1,$4,$5,$11,$12,$7}' multi_exon_f3.gtf |grep ^chr > multi_exon_f3.bed
     bedtools sort -i multi_exon_f3.bed > multi_exon_f3.bed2
-    closestBed -s -d -io -a $BED/hg19_pc_txSE.bed -b multi_exon_f3.bed2 > multi_exon_f3.dist
-    awk '$13>"'"$2"'"' multi_exon_f3.dist |cut -f 7-12 |sort -u > multi_exon_f4.bed
+    closestBed -s -d -a $BED/hg19_pc_txSE.bed -b multi_exon_f3.bed2 > multi_exon_f3.dist
+    awk '$13<"'"$2"'"' multi_exon_f3.dist |awk -F"\"" '{print $2}'| sort -u > multi_dist_re.list
+    awk -F"\"" 'NR==FNR{a[$0]}NR>FNR{if ($2 in a){}else{print $0}}' multi_dist_re.list multi_exon_f3.bed > multi_exon_f4.bed
     num_multi_f4=$(wc -l multi_exon_f4.bed|awk '{print $1}')
     multi_ol_ud=$((num_multi_f3-num_multi_f4))
     echo "$multi_ol_ud out of $num_multi_f3 multi-exon transcripts are too close ($2bp) to protein-coding genes"
 
-    rm single_exon_f3_exon.bed single_exon_f3_exon.bed2 single_exon_f3_exon.dist multi_exon_f3.gtf multi_exon_f3.bed multi_exon_f3.bed2 multi_exon_f3.dist
+    rm single_exon_f3_exon.bed single_exon_f3_exon.bed2 single_exon_f3_exon.dist multi_exon_f3.gtf multi_exon_f3.bed multi_exon_f3.bed2 multi_exon_f3.dist multi_dist_re.list singe_dist_re.list
 }
 
 cpc2_f(){ # $1=input.gtf
