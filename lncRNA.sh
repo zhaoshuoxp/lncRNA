@@ -76,13 +76,13 @@ known_f1(){ # $1=mod $2=r_fpkm $3=input.gtf $4=prefix
         
         # V29 hg38lift19
         awk -F'"' 'NR==FNR{a[$0]}NR>FNR{if ($6 in a) print $0}' $BED/gencode.v29lift37.long_noncoding_RNAs.list transcript.gtf > known_lncRNA.gtf
-        awk -F"\"" '$14>"'"$2"'"' known_lncRNA.gtf > known_lncRNA_fpkm.1.gtf
+        awk -F"\"" -v val="$2" '$14>val' known_lncRNA.gtf > known_lncRNA_fpkm.1.gtf
         num_ref=$(wc -l $BED/gencode.v29lift37.long_noncoding_RNAs.list|awk '{print $1}')
         echo "Load $num_ref known lncRNA transcripts from GENCODE"
         
     elif [ $1 = 'noncode' ];then
         awk -F'"' 'NR==FNR{a[$0]}NR>FNR{if ($6 in a) print $0}' $BED/NONCODE.list transcript.gtf > known_lncRNA.gtf
-        awk -F"\"" '$12>"'"$2"'"' known_lncRNA.gtf > known_lncRNA_fpkm.1.gtf
+        awk -F"\"" -v val="$2" '$12>val' known_lncRNA.gtf > known_lncRNA_fpkm.1.gtf
         num_ref=$(wc -l $BED/NONCODE.list|awk '{print $1}')
         echo "Load $num_ref known lncRNA transcripts from NONCODE"
     fi     
@@ -143,16 +143,16 @@ split_sm(){ # $1=input.gtf $2=mod $3=for NONCODE known add filters
 
 denovo_f1(){ # $1=s_fpkm $2=m_fpkm $3=single_length $4=multi_length $5=fpkm_pos
     # Remove FPKM<1 and length <200 bp single exon
-    awk -F"\"" '$"'"$5"'">"'"$1"'"' single_exon.gtf |awk '{if(($5-$4)>="'"$3"'"){print $0}}'> single_exon_f1.gtf
+    awk -F"\"" -v pos="$5" -v val="$1" '$pos>val' single_exon.gtf |awk -v dis="$3" '{if(($5-$4)>=dis){print $0}}'> single_exon_f1.gtf
     num_single_f1=$(wc -l single_exon_f1.gtf |awk '{print $1}')
     cut -f 4 -d '"' single_exon_f1.gtf >single_exon_f1.list
     echo "$num_single_f1 out of $num_single single-exon transcripts have FPKM>$1 and length>$3nt"
 
     # Remove FPKM<0.1 and length <200 bp multi exon
-    awk -F"\"" '$"'"$5"'">"'"$2"'"' multi_exon.gtf |awk '{if(($5-$4)>="'"$4"'"){print $0}}'> multi_exon_f0.gtf
+    awk -F"\"" -v pos="$5" -v val="$2" '$pos>val' multi_exon.gtf |awk -v dis="$3" '{if(($5-$4)>=dis){print $0}}'> multi_exon_f0.gtf
     cut -f 4 -d '"' multi_exon_f0.gtf > multi_exon_f0.list
     awk -F'"' 'NR==FNR{a[$0]}NR>FNR{if ($4 in a) print $0}' multi_exon_f0.list exon.gtf > multi_exon_f0_exon.gtf
-    awk '{a[$12]+=($5-$4)}END{for(i in a){if(a[i]>=200){print i}}}' multi_exon_f0_exon.gtf |cut -f2 -d'"' > multi_exon_f1.list
+    awk -v dis="$3" '{a[$12]+=($5-$4)}END{for(i in a){if(a[i]>=dis){print i}}}' multi_exon_f0_exon.gtf |cut -f2 -d'"' > multi_exon_f1.list
     awk -F'"' 'NR==FNR{a[$0]}NR>FNR{if ($4 in a) print $0}'  multi_exon_f1.list multi_exon_f0.gtf > multi_exon_f1.gtf
     num_multi_f1=$(wc -l multi_exon_f1.gtf |awk '{print $1}')
     echo "$num_multi_f1 out of $num_multi multi-exon transcripts have FPKM>$2 and length>$4nt"
@@ -206,8 +206,8 @@ denovo_f3(){ # $1=overlapping fraction
 denovo_f4(){ # $1=single_dist $2=multi_dist
     # Remove single-exon transcripts near (<2000bp) protein-coding genes
     bedtools sort -i single_exon_f3_exon.bed > single_exon_f3_exon.bed2
-    awk -v OFS="\t" '{print $1, $2-"'"$1"'", $3+"'"$1"'", $4,$5,$6}' single_exon_f3_exon.bed2> single_exon_f3_exon.bed3
-    intersectBed -a single_exon_f3_exon.bed3 -b $BED/hg19_pc_txSE.bed -v -s |awk -v OFS="\t" '{print $1, $2+"'"$1"'", $3-"'"$1"'", $4,$5,$6}' > single_exon_f4_exon.bed
+    awk -v OFS="\t" -v ext="$1" '{print $1, $2-ext, $3+ext, $4,$5,$6}' single_exon_f3_exon.bed2> single_exon_f3_exon.bed3
+    intersectBed -a single_exon_f3_exon.bed3 -b $BED/hg19_pc_txSE.bed -v -s |awk -v OFS="\t" -v ext="$1" '{print $1, $2+ext, $3-ext, $4,$5,$6}' > single_exon_f4_exon.bed
     num_single_f4=$(wc -l single_exon_f4_exon.bed|awk '{print $1}')
     single_ol_ud=$((num_single_f3-num_single_f4))
     echo "$single_ol_ud out of $num_single_f3 single-exon transcripts are too close ($1bp) to protein-coding genes"
@@ -215,8 +215,8 @@ denovo_f4(){ # $1=single_dist $2=multi_dist
     # Remove multi-exon transcripts near (<500bp) protein-coding genes
     awk -v OFS="\t" '{print $1,$4,$5,$11,$12,$7}' multi_exon_f3.gtf |grep ^chr > multi_exon_f3.bed
     bedtools sort -i multi_exon_f3.bed > multi_exon_f3.bed2
-    awk -v OFS="\t" '{print $1, $2-"'"$2"'", $3+"'"$2"'", $4,$5,$6}' multi_exon_f3.bed2 > multi_exon_f3.bed3
-    intersectBed -a multi_exon_f3.bed3 -b $BED/hg19_pc_txSE.bed -v -s |awk -v OFS="\t" '{print $1, $2+"'"$2"'", $3-"'"$2"'", $4,$5,$6}' > multi_exon_f4.bed
+    awk -v OFS="\t" -v ext="$2" '{print $1, $2-ext, $3+ext, $4,$5,$6}' multi_exon_f3.bed2 > multi_exon_f3.bed3
+    intersectBed -a multi_exon_f3.bed3 -b $BED/hg19_pc_txSE.bed -v -s |awk -v OFS="\t" -v ext="$2" '{print $1, $2+ext, $3-ext, $4,$5,$6}' > multi_exon_f4.bed
     num_multi_f4=$(wc -l multi_exon_f4.bed|awk '{print $1}')
     multi_ol_ud=$((num_multi_f3-num_multi_f4))
     echo "$multi_ol_ud out of $num_multi_f3 multi-exon transcripts are too close ($2bp) to protein-coding genes"
