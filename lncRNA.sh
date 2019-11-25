@@ -206,8 +206,10 @@ denovo_f3(){ # $1=overlapping fraction
 denovo_f4(){ # $1=single_dist $2=multi_dist
     # Remove single-exon transcripts near (<2000bp) protein-coding genes
     bedtools sort -i single_exon_f3_exon.bed > single_exon_f3_exon.bed2
-    awk -v OFS="\t" -v ext="$1" '{print $1, $2-ext, $3+ext, $4,$5,$6}' single_exon_f3_exon.bed2> single_exon_f3_exon.bed3
-    intersectBed -a single_exon_f3_exon.bed3 -b $BED/hg19_pc_txSE.bed -v -s |awk -v OFS="\t" -v ext="$1" '{print $1, $2+ext, $3-ext, $4,$5,$6}' > single_exon_f4_exon.bed
+    #awk -v OFS="\t" -v ext="$1" '{print $1, $2-ext, $3+ext, $4,$5,$6}' single_exon_f3_exon.bed2> single_exon_f3_exon.bed3
+    #intersectBed -a single_exon_f3_exon.bed3 -b $BED/hg19_pc_txSE.bed -v -s |awk -v OFS="\t" -v ext="$1" '{print $1, $2+ext, $3-ext, $4,$5,$6}' > single_exon_f4_exon.bed
+    closestBed -a single_exon_f3_exon.bed2 -b $BED/hg19_pc_txSE.bed -s -d |awk -v val="$1" '$13<val' | cut -f5 | sort -u > single_exon_f3_rm.list
+    awk 'NR==FNR{a[$0]}NR>FNR{if($5 in a){}else{print $0}}' single_exon_f3_rm.list single_exon_f3_exon.bed2 > single_exon_f4_exon.bed
     num_single_f4=$(wc -l single_exon_f4_exon.bed|awk '{print $1}')
     single_ol_ud=$((num_single_f3-num_single_f4))
     echo "$single_ol_ud out of $num_single_f3 single-exon transcripts are too close ($1bp) to protein-coding genes"
@@ -215,13 +217,15 @@ denovo_f4(){ # $1=single_dist $2=multi_dist
     # Remove multi-exon transcripts near (<500bp) protein-coding genes
     awk -v OFS="\t" '{print $1,$4,$5,$11,$12,$7}' multi_exon_f3.gtf |grep ^chr > multi_exon_f3.bed
     bedtools sort -i multi_exon_f3.bed > multi_exon_f3.bed2
-    awk -v OFS="\t" -v ext="$2" '{print $1, $2-ext, $3+ext, $4,$5,$6}' multi_exon_f3.bed2 > multi_exon_f3.bed3
-    intersectBed -a multi_exon_f3.bed3 -b $BED/hg19_pc_txSE.bed -v -s |awk -v OFS="\t" -v ext="$2" '{print $1, $2+ext, $3-ext, $4,$5,$6}' > multi_exon_f4.bed
+    #awk -v OFS="\t" -v ext="$2" '{print $1, $2-ext, $3+ext, $4,$5,$6}' multi_exon_f3.bed2 > multi_exon_f3.bed3
+    #intersectBed -a multi_exon_f3.bed3 -b $BED/hg19_pc_txSE.bed -v -s |awk -v OFS="\t" -v ext="$2" '{print $1, $2+ext, $3-ext, $4,$5,$6}' > multi_exon_f4.bed
+    closestBed -a multi_exon_f3.bed2 -b $BED/hg19_pc_txSE.bed -s -d |awk -v val="$2" '$13<val' | cut -f5 | sort -u > multi_exon_f3_rm.list
+    awk 'NR==FNR{a[$0]}NR>FNR{if($5 in a){}else{print $0}}' multi_exon_f3_rm.list multi_exon_f3.bed2 > multi_exon_f4.bed
     num_multi_f4=$(wc -l multi_exon_f4.bed|awk '{print $1}')
     multi_ol_ud=$((num_multi_f3-num_multi_f4))
     echo "$multi_ol_ud out of $num_multi_f3 multi-exon transcripts are too close ($2bp) to protein-coding genes"
 
-    rm single_exon_f3_exon.bed single_exon_f3_exon.bed2 single_exon_f3_exon.bed3 multi_exon_f3.gtf multi_exon_f3.bed multi_exon_f3.bed2 multi_exon_f3.bed3  
+    rm single_exon_f3_exon.bed single_exon_f3_exon.bed2 single_exon_f3_rm.list multi_exon_f3.gtf multi_exon_f3.bed multi_exon_f3.bed2 multi_exon_f3_rm.list
 }
 
 cpc2_f(){ # $1=input.gtf
